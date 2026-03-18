@@ -7,7 +7,7 @@ if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 from appdb import SessionLocal
-from directorio import (
+from pages.directorio import (
     Unidad,
     Puesto,
     Personal,
@@ -27,8 +27,6 @@ st.markdown("""
     footer {display: none;}
 </style>
 """, unsafe_allow_html=True)
-
-
 
 session = SessionLocal()
 
