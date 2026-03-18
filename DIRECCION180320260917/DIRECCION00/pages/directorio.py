@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import os
+import sys
 import io
 import json
 import base64
@@ -14,6 +15,12 @@ from urllib.parse import quote
 from sqlalchemy import Float, Boolean, Date, Column, Integer, String, ForeignKey, Text, create_engine, DateTime, or_
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker, backref
 from PIL import Image as PILImage, ImageOps
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
+
+from appdb import Base, engine, SessionLocal
 
 # --- INYECCIÓN DE TEMAS PERSONALIZADOS Y ESTILO DE EMOJIS ---
 if 'tema_visual' not in st.session_state:
@@ -364,10 +371,9 @@ class Espacio(Base):
     planta = relationship("Planta", back_populates="espacios")
 
     # 2. SEGUNDO LA CONEXIÓN (Corta y pega esto debajo de las clases)
-    engine = create_engine('sqlite:///directorio_escarcega.db', echo=False)
+  
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = SessionLocal()
 
 # --- 3. LÓGICA DEL ORGANIGRAMA INTERACTIVO (RECURSIVO, NIVELES INFINITOS) ---
 def reset_states():
@@ -1494,6 +1500,7 @@ def renderizar_organigrama_visual(session_db, unidades, puestos, personal_lista)
 # --- 1. CONFIGURACIÓN DE LA BASE DE DATOS (Debe ir arriba) ---
 engine = create_engine('sqlite:///directorio_escarcega.db', echo=False)
 Base.metadata.create_all(engine)
+
 # Migración: añadir columnas faltantes en `personal` si no existen
 try:
     from sqlalchemy import text
