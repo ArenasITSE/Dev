@@ -7,3 +7,4 @@ qrcode[pil]
 pillow
 reportlab
 werkzeug
+qrcode
