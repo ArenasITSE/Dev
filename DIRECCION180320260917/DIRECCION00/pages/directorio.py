@@ -3371,9 +3371,7 @@ if (":material/group: Personal" in tab_dict) or ("Personal" in tab_dict):
                             )
                             session.add(nuevo_personal)
                             session.commit()
-                            session.expire_all()
-                            st.cache_data.clear()
-                            st.cache_resource.clear()
+                            session.close()
                             st.success("Personal guardado correctamente")
                             st.rerun()
                             

@@ -3,20 +3,25 @@ import sys
 import streamlit as st
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PAGES_DIR = os.path.abspath(os.path.dirname(__file__))
+
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
+if PAGES_DIR not in sys.path:
+    sys.path.append(PAGES_DIR)
+
 from appdb import SessionLocal, DB_PATH
-from pages.directorio import (
-    Unidad,
-    Puesto,
-    Personal,
-    _nombre_completo_personal,
-    _render_persona_tarjeta,
-    _render_docente_expediente,
-    _es_docente,
-    renderizar_organigrama_visual
-)
+import directorio as dirmod
+
+Unidad = dirmod.Unidad
+Puesto = dirmod.Puesto
+Personal = dirmod.Personal
+_nombre_completo_personal = dirmod._nombre_completo_personal
+_render_persona_tarjeta = dirmod._render_persona_tarjeta
+_render_docente_expediente = dirmod._render_docente_expediente
+_es_docente = dirmod._es_docente
+renderizar_organigrama_visual = dirmod.renderizar_organigrama_visual
 
 st.set_page_config(page_title="Directorio Institucional", layout="wide")
 
@@ -33,18 +38,25 @@ with col1:
     st.title("📘 Directorio Institucional")
 with col2:
     if st.button("🔄 Recargar"):
-        st.cache_data.clear()
-        st.cache_resource.clear()
         st.rerun()
+
+st.caption(f"BD en uso: {DB_PATH}")
 
 session = SessionLocal()
 
 try:
-    session.expire_all()
+    session.close()
+    session = SessionLocal()
 
     todas_unidades = session.query(Unidad).all()
     todos_puestos = session.query(Puesto).all()
     todo_personal = session.query(Personal).all()
+
+    st.caption(
+        f"Unidades: {len(todas_unidades)} | "
+        f"Puestos: {len(todos_puestos)} | "
+        f"Personal: {len(todo_personal)}"
+    )
 
     puesto_id_to_puesto = {p.id: p for p in todos_puestos}
     unidad_id_to_unidad = {u.id: u for u in todas_unidades}
