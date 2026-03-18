@@ -6,7 +6,7 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-from appdb import SessionLocal
+from appdb import SessionLocal, DB_PATH
 from pages.directorio import (
     Unidad,
     Puesto,
@@ -19,6 +19,8 @@ from pages.directorio import (
 )
 
 st.set_page_config(page_title="Directorio Institucional", layout="wide")
+
+st.write("BD en uso:", DB_PATH)
 
 st.markdown("""
 <style>
