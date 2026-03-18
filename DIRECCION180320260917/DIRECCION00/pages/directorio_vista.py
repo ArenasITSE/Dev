@@ -20,8 +20,6 @@ from pages.directorio import (
 
 st.set_page_config(page_title="Directorio Institucional", layout="wide")
 
-st.write("BD en uso:", DB_PATH)
-
 st.markdown("""
 <style>
     section[data-testid="stSidebar"] {display: none;}
@@ -29,6 +27,15 @@ st.markdown("""
     footer {display: none;}
 </style>
 """, unsafe_allow_html=True)
+
+col1, col2 = st.columns([8, 1])
+with col1:
+    st.title("📘 Directorio Institucional")
+with col2:
+    if st.button("🔄 Recargar"):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.rerun()
 
 session = SessionLocal()
 
@@ -38,12 +45,6 @@ try:
     todas_unidades = session.query(Unidad).all()
     todos_puestos = session.query(Puesto).all()
     todo_personal = session.query(Personal).all()
-
-    st.caption(
-        f"Unidades: {len(todas_unidades)} | "
-        f"Puestos: {len(todos_puestos)} | "
-        f"Personal: {len(todo_personal)}"
-    )
 
     puesto_id_to_puesto = {p.id: p for p in todos_puestos}
     unidad_id_to_unidad = {u.id: u for u in todas_unidades}
