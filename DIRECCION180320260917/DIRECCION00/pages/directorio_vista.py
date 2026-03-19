@@ -8,13 +8,6 @@ if ROOT_DIR not in sys.path:
 
 from appdb import SessionLocal, DB_PATH
 from models import Unidad, Puesto, Personal
-from pages.directorio import (
-    _nombre_completo_personal,
-    _render_persona_tarjeta,
-    _render_docente_expediente,
-    _es_docente,
-    renderizar_organigrama_visual
-)
 
 st.set_page_config(page_title="Directorio Institucional", layout="wide")
 
@@ -80,8 +73,9 @@ try:
             for persona, puesto, unidad in resultados:
                 with st.container(border=True):
                     st.subheader(nombre_completo(persona))
-                    st.write(f"**Puesto:** {(puesto.nombre if puesto else 'Sin puesto')}")
-                    st.write(f"**Unidad:** {(unidad.nombre if unidad else 'Sin unidad')}")
+                    st.write(f"**Puesto:** {puesto.nombre if puesto else 'Sin puesto'}")
+                    st.write(f"**Unidad:** {unidad.nombre if unidad else 'Sin unidad'}")
+
                     if getattr(persona, "correo_institucional", None):
                         st.write(f"**Correo:** {persona.correo_institucional}")
                     if getattr(persona, "extension", None):
@@ -111,6 +105,7 @@ try:
                             with st.container(border=True):
                                 st.write(f"**Nombre:** {nombre_completo(persona)}")
                                 st.write(f"**Puesto:** {puesto.nombre if puesto else 'Sin puesto'}")
+
                                 if getattr(persona, "correo_institucional", None):
                                     st.write(f"**Correo:** {persona.correo_institucional}")
                                 if getattr(persona, "extension", None):
