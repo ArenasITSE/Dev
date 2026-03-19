@@ -1,27 +1,14 @@
 import os
 import sys
 import streamlit as st
+from sqlalchemy import or_
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-PAGES_DIR = os.path.abspath(os.path.dirname(__file__))
-
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
-if PAGES_DIR not in sys.path:
-    sys.path.append(PAGES_DIR)
-
 from appdb import SessionLocal, DB_PATH
-import directorio as dirmod
-
-Unidad = dirmod.Unidad
-Puesto = dirmod.Puesto
-Personal = dirmod.Personal
-_nombre_completo_personal = dirmod._nombre_completo_personal
-_render_persona_tarjeta = dirmod._render_persona_tarjeta
-_render_docente_expediente = dirmod._render_docente_expediente
-_es_docente = dirmod._es_docente
-renderizar_organigrama_visual = dirmod.renderizar_organigrama_visual
+from modelos_aprobacion import Unidad, Puesto, Personal
 
 st.set_page_config(page_title="Directorio Institucional", layout="wide")
 
@@ -33,21 +20,23 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-col1, col2 = st.columns([8, 1])
-with col1:
-    st.title("📘 Directorio Institucional")
-with col2:
-    if st.button("🔄 Recargar"):
-        st.rerun()
-
+st.title("📘 Directorio Institucional")
 st.caption(f"BD en uso: {DB_PATH}")
+
+if st.button("🔄 Recargar"):
+    st.rerun()
+
+def nombre_completo(p):
+    partes = [
+        (p.nombre or "").strip(),
+        (p.apellido_paterno or "").strip(),
+        (p.apellido_materno or "").strip(),
+    ]
+    return " ".join([x for x in partes if x]).strip()
 
 session = SessionLocal()
 
 try:
-    session.close()
-    session = SessionLocal()
-
     todas_unidades = session.query(Unidad).all()
     todos_puestos = session.query(Puesto).all()
     todo_personal = session.query(Personal).all()
@@ -68,46 +57,58 @@ try:
 
     if busqueda and busqueda.strip():
         q = busqueda.strip().upper()
-        coincidencias = []
+        resultados = []
 
-        for p in todo_personal:
-            nombre_full = _nombre_completo_personal(p).upper()
-            puesto_obj = puesto_id_to_puesto.get(p.puesto_id) if p.puesto_id else None
-            puesto_nom = (puesto_obj.nombre or "") if puesto_obj else ""
-            unidad = (
-                unidad_id_to_unidad.get(puesto_obj.unidad_id)
-                if puesto_obj and puesto_obj.unidad_id
-                else None
-            )
-            depto = (unidad.nombre or "").upper() if unidad else ""
+        for persona in todo_personal:
+            nombre = nombre_completo(persona).upper()
+            puesto = puesto_id_to_puesto.get(persona.puesto_id)
+            puesto_nombre = (puesto.nombre or "").upper() if puesto else ""
+            unidad = unidad_id_to_unidad.get(puesto.unidad_id) if puesto and puesto.unidad_id else None
+            unidad_nombre = (unidad.nombre or "").upper() if unidad else ""
 
-            if q in nombre_full or q in puesto_nom.upper() or q in depto:
-                coincidencias.append((p, puesto_nom, unidad))
+            if q in nombre or q in puesto_nombre or q in unidad_nombre:
+                resultados.append((persona, puesto, unidad))
 
-        if coincidencias:
-            st.markdown(f"**{len(coincidencias)} coincidencia(s) encontrada(s)**")
-            for p, puesto_nom, unidad in coincidencias:
-                if _es_docente(puesto_nom):
-                    _render_docente_expediente(p, session, puesto_id_to_puesto)
-                else:
-                    _render_persona_tarjeta(
-                        p,
-                        puesto_id_to_puesto,
-                        show_foto=True,
-                        session_db=session
-                    )
+        if resultados:
+            st.markdown(f"**{len(resultados)} coincidencia(s) encontrada(s)**")
+            for persona, puesto, unidad in resultados:
+                with st.container(border=True):
+                    st.subheader(nombre_completo(persona))
+                    st.write(f"**Puesto:** {(puesto.nombre if puesto else 'Sin puesto')}")
+                    st.write(f"**Unidad:** {(unidad.nombre if unidad else 'Sin unidad')}")
+                    if getattr(persona, "correo_institucional", None):
+                        st.write(f"**Correo:** {persona.correo_institucional}")
+                    if getattr(persona, "extension", None):
+                        st.write(f"**Extensión:** {persona.extension}")
+                    if getattr(persona, "celular_personal", None):
+                        st.write(f"**Celular:** {persona.celular_personal}")
         else:
             st.info("No se encontraron coincidencias. Intenta con otros términos.")
+
     else:
-        if todas_unidades:
-            renderizar_organigrama_visual(
-                session,
-                todas_unidades,
-                todos_puestos,
-                todo_personal
-            )
-        else:
+        if not todas_unidades:
             st.info("Aún no hay unidades registradas.")
+        else:
+            st.markdown("## 🏢 Estructura del Directorio")
+
+            for unidad in todas_unidades:
+                personas_unidad = []
+
+                for persona in todo_personal:
+                    puesto = puesto_id_to_puesto.get(persona.puesto_id)
+                    if puesto and puesto.unidad_id == unidad.id:
+                        personas_unidad.append((persona, puesto))
+
+                if personas_unidad:
+                    with st.expander(f"📁 {unidad.nombre} ({len(personas_unidad)} persona(s))", expanded=False):
+                        for persona, puesto in personas_unidad:
+                            with st.container(border=True):
+                                st.write(f"**Nombre:** {nombre_completo(persona)}")
+                                st.write(f"**Puesto:** {puesto.nombre if puesto else 'Sin puesto'}")
+                                if getattr(persona, "correo_institucional", None):
+                                    st.write(f"**Correo:** {persona.correo_institucional}")
+                                if getattr(persona, "extension", None):
+                                    st.write(f"**Extensión:** {persona.extension}")
 
 finally:
     session.close()
