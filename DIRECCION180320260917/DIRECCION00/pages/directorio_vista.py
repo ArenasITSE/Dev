@@ -1,15 +1,20 @@
 import os
 import sys
 import streamlit as st
-from models import Unidad, Puesto, Personal
-from sqlalchemy import or_
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
 
 from appdb import SessionLocal, DB_PATH
-from modelos_aprobacion import Unidad, Puesto, Personal
+from models import Unidad, Puesto, Personal
+from pages.directorio import (
+    _nombre_completo_personal,
+    _render_persona_tarjeta,
+    _render_docente_expediente,
+    _es_docente,
+    renderizar_organigrama_visual
+)
 
 st.set_page_config(page_title="Directorio Institucional", layout="wide")
 

@@ -11,20 +11,18 @@ import qrcode
 import re
 import pandas as pd
 
-import os
-import streamlit as st
-from appdb import SessionLocal, DB_PATH
-from models import Unidad, Puesto, Personal
-
 from datetime import datetime, timedelta
 from urllib.parse import quote
-from sqlalchemy import Float, Boolean, Date, Column, Integer, String, ForeignKey, Text, create_engine, DateTime, or_
-from sqlalchemy.orm import relationship, declarative_base, sessionmaker, backref
+from sqlalchemy import Float, Boolean, Date, Column, Integer, String, ForeignKey, Text, DateTime, or_
+from sqlalchemy.orm import relationship, backref
 from PIL import Image as PILImage, ImageOps
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.append(ROOT_DIR)
+
+from appdb import SessionLocal, DB_PATH
+from models import Unidad, Puesto, Personal
 
 from appdb import Base, engine, SessionLocal
 
@@ -100,7 +98,7 @@ st.markdown("""
 
 
 # --- 2. BASE DE DATOS MEJORADA ---
-Base = declarative_base()
+
 
 class Unidad(Base):
     __tablename__ = 'unidades'
