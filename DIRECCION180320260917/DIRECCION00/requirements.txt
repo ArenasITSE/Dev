@@ -1,9 +1,0 @@
-streamlit>=1.40.0
-pandas
-openpyxl
-matplotlib
-sqlalchemy
-qrcode[pil]
-pillow
-reportlab
-werkzeug
