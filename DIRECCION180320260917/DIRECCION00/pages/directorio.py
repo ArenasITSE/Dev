@@ -10,6 +10,11 @@ import secrets
 import qrcode
 import re
 import pandas as pd
+
+import os
+import streamlit as st
+from appdb import SessionLocal, DB_PATH
+
 from datetime import datetime, timedelta
 from urllib.parse import quote
 from sqlalchemy import Float, Boolean, Date, Column, Integer, String, ForeignKey, Text, create_engine, DateTime, or_
@@ -1406,6 +1411,13 @@ def renderizar_organigrama_visual(session_db, unidades, puestos, personal_lista)
         else:
             # Para personal no docente: tarjeta compacta y, si tiene cursos o producción, expander Producción y Capacitación
             _render_persona_tarjeta(p, puesto_id_to_puesto, show_foto=True, session_db=session_db)
+
+
+    st.write("BD admin:", DB_PATH)
+    st.write("Existe archivo admin:", os.path.exists(DB_PATH))
+    st.write("Total unidades admin:", session.query(Unidad).count())
+    st.write("Total puestos admin:", session.query(Puesto).count())
+    st.write("Total personal admin:", session.query(Personal).count())
 
     # Nivel 1: Directorio Institucional (cúspide)
     st.markdown("---")
