@@ -14,6 +14,7 @@ import pandas as pd
 import os
 import streamlit as st
 from appdb import SessionLocal, DB_PATH
+from models import Unidad, Puesto, Personal
 
 from datetime import datetime, timedelta
 from urllib.parse import quote

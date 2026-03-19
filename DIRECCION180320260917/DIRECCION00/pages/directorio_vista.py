@@ -1,6 +1,7 @@
 import os
 import sys
 import streamlit as st
+from models import Unidad, Puesto, Personal
 from sqlalchemy import or_
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
