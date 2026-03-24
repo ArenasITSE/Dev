@@ -2,8 +2,8 @@ name: Streamlit Keep Alive
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Se ejecuta cada 6 horas
-  workflow_dispatch:      # Permite ejecutarlo manualmente para probar
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   wake_up_job:
@@ -21,4 +21,4 @@ jobs:
         run: pip install selenium webdriver-manager
 
       - name: Ejecutar script de activación
-        run: python keep_alive.py
+        run: python DIRECCION00/keep_alive.py
