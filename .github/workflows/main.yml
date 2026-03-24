@@ -1,24 +1,36 @@
-name: Streamlit Keep Alive
+name: Streamlit Keep Alive Bot
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+    - cron: '0 */6 * * *' # Se ejecuta automáticamente cada 6 horas
+  workflow_dispatch:      # Permite ejecución manual desde la pestaña "Actions"
 
 jobs:
-  wake_up_job:
+  ping_job:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v3
+      - name: 1. Descargando código del repositorio
+        uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v4
+      - name: 2. Configurando entorno Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
-      - name: Instalar Selenium
-        run: pip install selenium webdriver-manager
+      - name: 3. Instalando Selenium y Webdriver Manager
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager
 
-      - name: Ejecutar script de activación
-        run: python DIRECCION00/keep_alive.py
+      - name: 4. Localizando y ejecutando el script
+        run: |
+          # Buscamos el archivo keep_alive.py en todo el repo
+          SCRIPT_PATH=$(find . -name "keep_alive.py" | head -n 1)
+          
+          if [ -z "$SCRIPT_PATH" ]; then
+            echo "Error: No se encontró el archivo keep_alive.py en ninguna carpeta."
+            exit 1
+          fi
+          
+          echo "Archivo encontrado en: $SCRIPT_PATH"
+          python "$SCRIPT_PATH"
