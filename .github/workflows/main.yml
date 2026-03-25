@@ -2,7 +2,7 @@ name: Streamlit Keep Alive Bot
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Se ejecuta automáticamente cada 6 horas
+    - cron: '0 */2 * * *' # Se ejecuta automáticamente cada 6 horas
   workflow_dispatch:      # Permite ejecución manual desde la pestaña "Actions"
 
 jobs:
